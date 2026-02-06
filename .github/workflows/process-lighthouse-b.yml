@@ -1,0 +1,67 @@
+name: Process data from lighthouse-B
+
+on:
+  schedule:
+    - cron: "15 3 * * *"   # UTC – justér efter DK-tid
+  workflow_dispatch: {}
+
+permissions:
+  contents: read   # lighthouse-A: kun læsning
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout lighthouse-A
+        uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Setup SSH access to lighthouse-B
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.LIGHTHOUSE_B_DEPLOY_KEY }}
+
+      - name: Clone lighthouse-B to temp dir
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REPO_B_DIR="$(mktemp -d)"
+          echo "REPO_B_DIR=$REPO_B_DIR" >> "$GITHUB_ENV"
+
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+          git clone "${{ secrets.LIGHTHOUSE_B_SSH_URL }}" "$REPO_B_DIR"
+
+      - name: Install R packages
+        run: |
+          Rscript -e 'install.packages(c("readr","dplyr"), repos="https://cloud.r-project.org")'
+
+      - name: Run R script from lighthouse-A
+        env:
+          REPO_B_DIR: ${{ env.REPO_B_DIR }}
+        run: |
+          Rscript scripts/process_lighthouse_b.R
+
+      - name: Commit & push changes to lighthouse-B
+        env:
+          REPO_B_DIR: ${{ env.REPO_B_DIR }}
+        run: |
+          set -euo pipefail
+          cd "$REPO_B_DIR"
+
+          if git diff --quiet; then
+            echo "No changes detected – nothing to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "Automated update from lighthouse-A ($(date -u +%F\ %T) UTC)"
+          git push
