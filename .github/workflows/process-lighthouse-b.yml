@@ -39,7 +39,7 @@ jobs:
 
       - name: Install R packages
         run: |
-          Rscript -e 'install.packages(c("readr","dplyr"), repos="https://cloud.r-project.org")'
+          Rscript -e 'install.packages(c("readr","dplyr", "httr", "here"), repos="https://cloud.r-project.org")'
 
       - name: Run R script from lighthouse-A
         env:
