@@ -1,3 +1,6 @@
+# Her skal vi nok have noget ind, der sikrer at jeg har directories at 
+# arbejde med lokalt.
+
 repo_b_dir <- Sys.getenv("REPO_B_DIR", unset = NA_character_)
 if (is.na(repo_b_dir) || repo_b_dir == "") {
   stop("REPO_B_DIR is not set")
