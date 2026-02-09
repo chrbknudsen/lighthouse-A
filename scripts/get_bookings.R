@@ -9,11 +9,11 @@
 library(lubridate)
 library(httr)
 library(dplyr)
-  dato <- today() %m-% months(2)
+  dato <- lubridate::today() %m-% lubridate::months(2)
   dato <- as.character(dato)
 dato
 
-  url <- modify_url(
+  url <- httr::modify_url(
     url = "https://kubkalender.kb.dk",
     path = c("1.1", "space" ,"bookings"),
     query = list(
@@ -23,9 +23,9 @@ dato
       limit = 500
     )
   )
-test_data <-   GET(url, add_headers('Authorization' = paste("bearer", token))) |> 
-    content()
+test_data <-   httr::GET(url, add_headers('Authorization' = paste("bearer", token))) |> 
+    httr::content()
 
 length(test_data)
 
-test_data |> bind_rows() |> View()
+test_data |> dplyr::bind_rows() 

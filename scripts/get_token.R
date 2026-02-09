@@ -3,7 +3,8 @@
 # time, og det må være nok til de fleste forhold.
 library(tidyverse)
 library(httr)
-if(str_detect(here::here(), "Users/cbk")){
+library(stringr)
+if(stringr::str_detect(here::here(), "Users/cbk")){
   client_secret <- keyring::key_get("libcal")
 }else{
   client_secret <- Sys.getenv("CLIENT_SECRET")
@@ -17,7 +18,7 @@ get_token <- function(client_secret){
   token <- httr::POST(token_endpoint,
                 body = list(grant_type = "client_credentials",
                             client_id = client_id,
-                            client_secret = client_secret)) %>% 
+                            client_secret = client_secret)) |> 
     httr::content() 
   token[["access_token"]]
   

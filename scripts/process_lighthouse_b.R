@@ -16,10 +16,10 @@ if (!file.exists(input_path)) {
 library(readr)
 library(dplyr)
 
-df <- read_csv(input_path, show_col_types = FALSE)
+df <- readr::read_csv(input_path, show_col_types = FALSE)
 
 # ---- DINE TRANSFORMATIONER ----
-df <- df |> mutate(processed_at = Sys.time())
+df <- df |> dplyr::mutate(processed_at = Sys.time())
 
 # Skriv direkte tilbage til lighthouse-B
-write_csv(df, input_path)
+readr::write_csv(df, input_path)
