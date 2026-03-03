@@ -6,7 +6,7 @@ fetch_space_bookings_all <- function(
   base_url = "https://kubkalender.kb.dk",
   lid = 3087,
   date = dato,
-  days = 365,
+  days = as.integer(lubridate::today() - (lubridate::today() %m-% months(36))), # henter default for sidste tre år
   limit = 500,
   form_answers = 1,
   check_in_status = 1,
